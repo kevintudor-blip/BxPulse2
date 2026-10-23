@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>BxPulse Analytics | Behavioral & IEP Platform</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: #ffffff !important; color: #0f172a !important; font-size: 11pt; }
+      .print-card { border: 1px solid #cbd5e1 !important; box-shadow: none !important; margin-bottom: 1rem; page-break-inside: avoid; }
+    }
+    .print-only { display: none; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .touch-target { min-height: 40px; }
+
+    /* 3D Visual Effects & Depth Styling */
+    .card-3d {
+      background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255,255,255,0.8);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-3d:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 30px -10px rgba(16, 185, 129, 0.12), 0 12px 15px -8px rgba(2, 132, 199, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+    .btn-3d {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transition: all 0.15s ease;
+    }
+    .btn-3d:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+    .badge-3d {
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0,0,0,0.06);
+    }
+    
+    /* Layout Density Modes */
+    body.compact-mode .card-3d { padding: 0.75rem !important; }
+    body.compact-mode main { space-y: 0.75rem !important; }
+    body.high-contrast { background-color: #0f172a !important; color: #f8fafc !important; }
+    body.high-contrast .card-3d { background: #1e293b !important; color: #f8fafc !important; border-color: #334155 !important; }
+  </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white" onmousemove="resetInactivityTimer()" onclick="resetInactivityTimer()" onkeydown="resetInactivityTimer()">
+
+  <!-- AUTHENTICATION OVERLAY -->
+  <div id="authScreen" class="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full p-6 sm:p-8 relative my-auto card-3d">
+      <div class="text-center space-y-3 mb-6">
+        <div class="inline-flex items-center justify-center px-4 py-2.5 rounded-2xl bg-gradient-to-tr from-emerald-500 to-sky-600 text-white shadow-lg shadow-emerald-500/30 tracking-tight gap-2 btn-3d">
+          <span class="text-2xl font-black tracking-tighter">Bx</span>
+          <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12h4l2 -5l3 10l2.5 -7l2.5 4h6" stroke="#ffffff" stroke-width="2.2"></path>
+            <circle cx="8" cy="7" r="1.5" fill="#38bdf8"></circle>
+            <circle cx="11" cy="17" r="1.5" fill="#34d399"></circle>
+            <circle cx="13.5" cy="10" r="1.5" fill="#60a5fa"></circle>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center justify-center gap-1.5">
+            <span class="text-emerald-600">Bx</span><span class="text-sky-600">Pulse</span> <span class="text-slate-700 text-lg font-bold">Analytics</span>
+          </h1>
+          <p class="text-xs text-slate-500 font-medium">HIPAA & FERPA Compliant Special Education System</p>
+        </div>
+      </div>
+
+      <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Username / Email</label>
+          <div class="relative">
+            <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+            <input type="email" id="loginEmail" required placeholder="e.g. kevin.tudor@brightmontacademy.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-3 text-xs text-slate-800 focus:bg-white focus:border-emerald-500 focus:outline-none transition touch-target">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Password</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+            <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-3 text-xs text-slate-800 focus:bg-white focus:border-emerald-500 focus:outline-none transition touch-target">
+          </div>
+        </div>
+
+        <div id="loginErrorMsg" class="hidden bg-rose-50 border border-rose-200 text-rose-600 text-xs rounded-xl p-2.5 text-center font-medium">
+          <i class="fa-solid fa-triangle-exclamation mr-1"></i> Invalid credentials. Please verify your email and password.
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-sky-600 hover:from-emerald-500 hover:to-sky-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2 touch-target btn-3d">
+          <span>Sign In to Dashboard</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </form>
+
+      <div class="mt-5 text-center">
+        <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-200 badge-3d">
+          <i class="fa-solid fa-shield-halved text-emerald-600"></i> Master Access Protected for Kevin Tudor
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="no-print bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-2 sm:gap-3">
+      
+      <!-- HEADER LOGO -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <div class="h-9 px-2.5 sm:h-10 sm:px-3 rounded-xl bg-gradient-to-tr from-emerald-500 to-sky-600 text-white flex items-center justify-center font-black shadow-md shadow-emerald-500/20 gap-1.5 btn-3d">
+          <span class="text-sm sm:text-base font-black tracking-tighter">Bx</span>
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12h4l2 -5l3 10l2.5 -7l2.5 4h6" stroke="#ffffff" stroke-width="2"></path>
+            <circle cx="8" cy="7" r="1.2" fill="#38bdf8"></circle>
+            <circle cx="11" cy="17" r="1.2" fill="#34d399"></circle>
+            <circle cx="13.5" cy="10" r="1.2" fill="#60a5fa"></circle>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <h1 class="font-black text-base sm:text-lg text-slate-900 tracking-tight">Bx<span class="text-sky-600">Pulse</span></h1>
+            <span id="userRoleBadge" class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] sm:text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider badge-3d">
+              Master Admin
+            </span>
+          </div>
+          <p class="text-[10px] sm:text-[11px] text-slate-500 font-semibold hidden sm:block">Special Education & Behavioral Analytics</p>
+        </div>
+      </div>
+
+      <!-- Active Student Selector -->
+      <div class="flex items-center space-x-1.5 bg-slate-100/90 px-2.5 py-1.5 rounded-xl border border-slate-200 shadow-inner">
+        <i class="fa-solid fa-graduation-cap text-emerald-600 text-xs"></i>
+        <select id="activeStudentSelect" onchange="switchStudentContext()" class="bg-transparent text-xs font-bold text-slate-800 focus:outline-none cursor-pointer max-w-[130px] sm:max-w-xs truncate">
+          <!-- Dynamically populated -->
+        </select>
+      </div>
+
+      <!-- Action & Utility Controls -->
+      <div class="flex items-center space-x-1.5 sm:space-x-2">
+        <a href="mailto:troubleshooting.bxpulse@gmail.com?subject=BxPulse%20Engineering%20Support%20Request" 
+           title="Contact Engineering Support" 
+           class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 touch-target btn-3d">
+          <i class="fa-solid fa-bug text-rose-500 text-xs"></i>
+          <span class="hidden md:inline">Engineering Support</span>
+        </a>
+
+        <button onclick="toggleAnonymizePII()" id="anonymizeBtn" title="Toggle FERPA Anonymized Mode" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 touch-target btn-3d">
+          <i class="fa-solid fa-user-shield text-emerald-600"></i>
+          <span class="hidden lg:inline" id="anonymizeLabel">Mask PII</span>
+        </button>
+
+        <button onclick="handleUserLogout()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 touch-target btn-3d">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span class="hidden md:inline">Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- PARENT / RESTRICTED BANNER -->
+  <div id="roleAccessBanner" class="hidden no-print bg-sky-500/10 border-b border-sky-300 text-sky-900 text-xs py-2 px-4 text-center font-medium flex justify-center items-center gap-2">
+    <i class="fa-solid fa-info-circle text-sky-600"></i>
+    <span id="roleAccessBannerText">Standard Account Access Mode</span>
+  </div>
+
+  <!-- APPLICATION MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-5 flex-1 w-full space-y-5 sm:space-y-6 pb-20 md:pb-6">
+    
+    <!-- DYNAMIC ROLE-BASED NAVIGATION TABS -->
+    <div class="no-print flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+      <div class="flex space-x-1.5 overflow-x-auto custom-scrollbar pb-1 max-w-full" id="navigationTabsContainer">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5 touch-target btn-3d">
+        <i class="fa-solid fa-print"></i>
+        <span>Print Summary</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: ANALYTICS -->
+    <section id="sec-analytics" class="space-y-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="card-3d rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-sm flex items-center space-x-3">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-base flex-shrink-0 badge-3d">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 truncate">Mean Goal Progress</p>
+            <h3 class="text-lg sm:text-xl font-black text-slate-800" id="statFocusPct">0.0%</h3>
+            <span class="text-[9px] sm:text-[10px] font-bold text-emerald-600 truncate block">Live Aggregate</span>
+          </div>
+        </div>
+
+        <div class="card-3d rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-sm flex items-center space-x-3">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-base flex-shrink-0 badge-3d">
+            <i class="fa-solid fa-landmark"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 truncate">Board Jurisdiction</p>
+            <h3 class="text-xs sm:text-sm font-black text-slate-800 truncate" id="statStateCode">IL (ISBE)</h3>
+            <span class="text-[9px] sm:text-[10px] font-bold text-sky-600 truncate block">50-State Standard</span>
+          </div>
+        </div>
+
+        <div class="card-3d rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-sm flex items-center space-x-3">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center font-bold text-base flex-shrink-0 badge-3d">
+            <i class="fa-solid fa-building-columns"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 truncate">Active District</p>
+            <h3 class="text-xs sm:text-sm font-black text-slate-800 truncate" id="statDistrict">District #158</h3>
+            <span class="text-[9px] sm:text-[10px] font-bold text-teal-600 truncate block">Filtered Roster</span>
+          </div>
+        </div>
+
+        <div class="card-3d rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-sm flex items-center space-x-3">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-base flex-shrink-0 badge-3d">
+            <i class="fa-solid fa-database"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[9px] sm:text-[10px] uppercase font-extrabold text-slate-400 truncate">Logged Observations</p>
+            <h3 class="text-lg sm:text-xl font-black text-slate-800" id="statTotalLogs">0 Events</h3>
+            <span class="text-[9px] sm:text-[10px] font-bold text-emerald-600 truncate block"><i class="fa-solid fa-circle text-[8px]"></i> Synchronized</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+        <div class="card-3d rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-emerald-600"></i> Predictive Trend Trajectory
+              </h3>
+              <p class="text-xs text-slate-500">Metric Scores vs. Target Benchmark</p>
+            </div>
+            <span class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-1 rounded-lg border border-emerald-200 badge-3d">Phase Trend</span>
+          </div>
+          <div class="relative h-60 sm:h-64">
+            <canvas id="predictiveChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="card-3d rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-chart-column text-sky-600"></i> Performance by Subject & Setting
+              </h3>
+              <p class="text-xs text-slate-500">Aggregated Mean Score per Class</p>
+            </div>
+            <span class="text-[10px] bg-sky-50 text-sky-700 font-bold px-2 py-1 rounded-lg border border-sky-200 badge-3d">Class Aggregates</span>
+          </div>
+          <div class="relative h-60 sm:h-64">
+            <canvas id="subjectChartCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: INTERACTIVE GOALS MANAGEMENT -->
+    <section id="sec-goals" class="hidden space-y-4">
+      <div class="card-3d rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-emerald-600"></i> Active IEP / BIP Goals & Direct Data Logging
+            </h2>
+            <p class="text-xs text-slate-500">Edit benchmarks, log observations, archive, or delete goals.</p>
+          </div>
+          <button onclick="openAddGoalModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 touch-target shadow-sm btn-3d">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add New Goal</span>
+          </button>
+        </div>
+
+        <div id="interactiveGoalsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Dynamic goal cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: GEMINI AI GOAL WRITER & BEHAVIOR STRATEGY BUILDER -->
+    <section id="sec-aigoalwriter" class="hidden space-y-5">
+      <div class="card-3d rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm space-y-6">
+        <div class="flex items-center justify-between border-b pb-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xl btn-3d">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-black text-slate-900">Gemini AI Goal Writer & Behavior Assistant</h2>
+              <p class="text-xs text-slate-500">Automated SMART IEP Goal Formulation & Clinical Guidance</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-4">
+            <h3 class="font-extrabold text-slate-900 text-sm flex items-center gap-2 border-b pb-2">
+              <i class="fa-solid fa-bullseye text-emerald-600"></i> SMART IEP Goal Generator
+            </h3>
+            <form onsubmit="generateSmartGoalAI(event)" class="space-y-3 text-xs">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Target Skill Domain</label>
+                <select id="aiGoalDomain" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800">
+                  <option value="Behavioral">Behavioral (On-Task, Self-Regulation)</option>
+                  <option value="Social-Emotional">Social-Emotional (Peer Interaction)</option>
+                  <option value="Academic">Academic (Math, Reading)</option>
+                  <option value="Communication">Communication (Requests)</option>
+                </select>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Baseline Score (%)</label>
+                  <input type="number" id="aiGoalBaseline" min="0" max="100" value="45" required class="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-bold">
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Target Benchmark (%)</label>
+                  <input type="number" id="aiGoalTarget" min="0" max="100" value="85" required class="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-bold">
+                </div>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Target Area Description</label>
+                <input type="text" id="aiGoalArea" required value="Sustaining independent on-task engagement during math" class="w-full bg-white border border-slate-200 rounded-xl p-2.5">
+              </div>
+              <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition shadow btn-3d">
+                Formulate Compliant SMART Goal
+              </button>
+            </form>
+
+            <div id="aiGoalOutputBox" class="hidden bg-white p-4 rounded-xl border border-emerald-200 space-y-3">
+              <p id="aiGoalGeneratedText" class="text-xs text-slate-800 font-medium leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-100"></p>
+              <button onclick="addGeneratedGoalToActiveStudent()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs py-2.5 rounded-xl transition btn-3d">
+                Add Goal to Current Student Profile
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-200 space-y-4">
+            <h3 class="font-extrabold text-slate-900 text-sm flex items-center gap-2 border-b pb-2">
+              <i class="fa-solid fa-shield-cat text-sky-600"></i> Behavior Strategy Builder
+            </h3>
+            <form onsubmit="generateBipStrategyAI(event)" class="space-y-3 text-xs">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Target Problem Behavior</label>
+                <select id="aiBipBehavior" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800">
+                  <option value="Off-Task Verbal Disruptions">Off-Task Verbal Disruptions</option>
+                  <option value="Elopement / Leaving Area">Elopement / Leaving Area</option>
+                  <option value="Task Refusal & Non-Compliance">Task Refusal & Non-Compliance</option>
+                  <option value="Peer Conflict & Physical Aggression">Peer Conflict & Physical Aggression</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Hypothesized Function</label>
+                <select id="aiBipFunction" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 font-bold text-slate-800">
+                  <option value="Escape / Avoidance">Escape / Avoidance</option>
+                  <option value="Attention Seeking">Attention Seeking</option>
+                  <option value="Access to Tangible">Access to Tangible</option>
+                </select>
+              </div>
+              <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-xl transition shadow btn-3d">
+                Generate Clinical Interventions
+              </button>
+            </form>
+
+            <div id="aiBipOutputBox" class="hidden bg-white p-4 rounded-xl border border-sky-200 space-y-3 text-xs">
+              <div id="aiBipGeneratedContent" class="space-y-2 text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-100"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: DIRECT MESSAGING HUB -->
+    <section id="sec-messaging" class="hidden space-y-4">
+      <div class="card-3d rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm space-y-4 max-w-4xl mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 gap-3">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-lg badge-3d">
+              <i class="fa-solid fa-comments"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-black text-slate-900">Direct Messaging Hub</h2>
+              <p class="text-xs text-slate-500">Integrated Portal Communication</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+            <label class="text-xs font-bold text-slate-600 whitespace-nowrap"><i class="fa-solid fa-paper-plane text-sky-600 mr-1"></i> Target:</label>
+            <select id="messageRecipientSelect" onchange="switchMessagingRecipient()" class="bg-white border border-slate-200 text-xs font-bold rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer max-w-[200px] truncate">
+            </select>
+            <button onclick="openLinkParentContactsModal()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition flex items-center gap-1 btn-3d shadow-sm">
+              <i class="fa-solid fa-user-plus text-[11px]"></i>
+              <span>+ Link Contacts</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="conversationBanner" class="bg-sky-50 border border-sky-200 text-sky-900 px-3.5 py-2 rounded-xl text-xs font-bold flex justify-between items-center">
+          <span>Active Thread: Direct Message with <strong id="conversationPartnerName">Select Contact</strong></span>
+          <span class="text-[10px] bg-sky-200/80 px-2 py-0.5 rounded-full text-sky-800 uppercase font-extrabold" id="conversationPartnerRole">Role</span>
+        </div>
+
+        <div id="messageThreadContainer" class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 h-80 overflow-y-auto custom-scrollbar space-y-3 text-xs"></div>
+
+        <form onsubmit="handleSendPortalMessage(event)" class="space-y-2">
+          <div class="flex items-center space-x-2">
+            <input type="text" id="portalMessageInput" required placeholder="Type a direct message or progress update..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-xs focus:bg-white focus:border-emerald-500 focus:outline-none transition touch-target">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-5 py-3 rounded-xl transition flex items-center gap-1.5 touch-target shadow-sm btn-3d">
+              <span>Send Message</span>
+              <i class="fa-solid fa-paper-plane text-xs"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 5: MULTI-METHOD DATA COLLECTION HUB -->
+    <section id="sec-tracking" class="hidden space-y-5 sm:space-y-6">
+      <div class="bg-gradient-to-r from-emerald-600 to-sky-600 text-white rounded-2xl p-3.5 sm:p-4 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 btn-3d">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-bold text-base">
+            <i class="fa-solid fa-bullseye"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-100 block">Target Goal & Class Link</span>
+            <h3 class="text-xs sm:text-sm font-bold" id="linkedGoalDisplayTitle">Select Goal Below</h3>
+          </div>
+        </div>
+        <div class="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-2">
+          <select id="globalTrackerClassSelect" class="w-full sm:w-auto bg-white text-slate-800 text-xs font-bold rounded-xl px-2.5 py-1.5 focus:outline-none shadow touch-target"></select>
+          <select id="globalTrackerGoalSelect" onchange="syncGlobalTrackerGoal()" class="w-full sm:w-auto bg-white text-slate-800 text-xs font-bold rounded-xl px-3 py-2 focus:outline-none shadow touch-target"></select>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-1.5 border border-slate-200/80 shadow-sm flex flex-wrap gap-1.5 text-xs font-bold no-print card-3d">
+        <button onclick="switchDataMethod('mts')" id="methodBtn-mts" class="data-method-btn bg-emerald-600 text-white px-3 py-2 rounded-xl transition touch-target btn-3d">
+          <i class="fa-solid fa-stopwatch mr-1"></i> MTS Timer
+        </button>
+        <button onclick="switchDataMethod('abc')" id="methodBtn-abc" class="data-method-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl transition touch-target">
+          <i class="fa-solid fa-sitemap mr-1"></i> ABC Data
+        </button>
+        <button onclick="switchDataMethod('freq')" id="methodBtn-freq" class="data-method-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl transition touch-target">
+          <i class="fa-solid fa-calculator mr-1"></i> Frequency Counter
+        </button>
+        <button onclick="switchDataMethod('dur')" id="methodBtn-dur" class="data-method-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl transition touch-target">
+          <i class="fa-solid fa-hourglass-half mr-1"></i> Duration / Latency
+        </button>
+        <button onclick="switchDataMethod('task')" id="methodBtn-task" class="data-method-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl transition touch-target">
+          <i class="fa-solid fa-list-check mr-1"></i> Task Analysis
+        </button>
+      </div>
+
+      <!-- METHOD 1: MTS TIMER -->
+      <div id="method-mts" class="method-panel card-3d bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-md max-w-2xl mx-auto space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Momentary Time Sampling (MTS) Timer</h3>
+            <p class="text-xs text-slate-500">Interval recording tool with chime</p>
+          </div>
+          <select id="mtsIntervalSelect" onchange="resetMtsTimer()" class="bg-slate-50 border border-slate-200 text-xs font-bold rounded-xl px-2.5 py-1.5 focus:outline-none">
+            <option value="10">10 Secs</option>
+            <option value="30" selected>30 Seconds</option>
+            <option value="60">1 Minute</option>
+          </select>
+        </div>
+
+        <div class="text-center py-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <div id="mtsDigits" class="text-5xl font-mono font-black text-emerald-600">00:30</div>
+          <div id="mtsStatusText" class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Timer Ready</div>
+          <div class="flex justify-center space-x-3 pt-2">
+            <button id="mtsToggleBtn" onclick="toggleMtsTimer()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow transition btn-3d">Start Session</button>
+            <button onclick="resetMtsTimer()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">Reset</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 sm:gap-4">
+          <button id="mtsBtnOn" onclick="recordMtsTally(true)" class="bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-500 text-emerald-800 font-bold py-4 rounded-2xl text-center btn-3d">
+            <i class="fa-solid fa-circle-check text-2xl text-emerald-600 block mb-1"></i> ON-TASK (+100%)
+          </button>
+          <button id="mtsBtnOff" onclick="recordMtsTally(false)" class="bg-rose-50 hover:bg-rose-100 border-2 border-rose-500 text-rose-800 font-bold py-4 rounded-2xl text-center btn-3d">
+            <i class="fa-solid fa-circle-xmark text-2xl text-rose-600 block mb-1"></i> OFF-TASK (0%)
+          </button>
+        </div>
+      </div>
+
+      <!-- METHOD 2: ABC LOGGER -->
+      <div id="method-abc" class="method-panel hidden card-3d bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-md max-w-2xl mx-auto space-y-4">
+        <h3 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2">ABC Data Logger</h3>
+        <form onsubmit="handleAbcSubmit(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Antecedent Trigger</label>
+            <select id="abcAntecedent" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+              <option value="Demand Presented">Demand Presented</option>
+              <option value="Transition">Transition Between Activities</option>
+              <option value="Peer Interaction">Peer Conflict / Interaction</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Observed Behavior Description</label>
+            <textarea id="abcBehavior" rows="2" required placeholder="Describe target behavior..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Consequence</label>
+              <select id="abcConsequence" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                <option value="Task Escaped">Task Temporarily Escaped</option>
+                <option value="Attention Given">Redirection Given</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Hypothesized Function</label>
+              <select id="abcFunction" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                <option value="Escape">Escape / Avoidance</option>
+                <option value="Attention">Attention Seeking</option>
+                <option value="Access">Access to Tangible</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition shadow btn-3d">
+            Log ABC Entry
+          </button>
+        </form>
+      </div>
+
+      <!-- METHOD 3: FREQUENCY COUNTER -->
+      <div id="method-freq" class="method-panel hidden card-3d bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-md max-w-2xl mx-auto space-y-4 text-center">
+        <h3 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2">Frequency Tally Counter</h3>
+        <div class="py-6 bg-slate-50 rounded-2xl border border-slate-200">
+          <div id="freqCountDisplay" class="text-6xl font-black text-sky-600">0</div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="adjustFreqCount(1)" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-lg btn-3d">+1 Event</button>
+          <button onclick="adjustFreqCount(-1)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl text-lg btn-3d">-1 Undo</button>
+        </div>
+        <button onclick="saveFreqObservation()" class="w-full bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold py-3 rounded-xl shadow btn-3d">
+          Commit Frequency Log
+        </button>
+      </div>
+
+      <!-- METHOD 4: DURATION STOPWATCH -->
+      <div id="method-dur" class="method-panel hidden card-3d bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-md max-w-2xl mx-auto space-y-4 text-center">
+        <h3 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2">Duration & Latency Stopwatch</h3>
+        <div class="py-6 bg-slate-50 rounded-2xl border border-slate-200">
+          <div id="stopwatchDisplay" class="text-5xl font-mono font-black text-emerald-600">00:00</div>
+        </div>
+        <div class="flex justify-center gap-3">
+          <button id="stopwatchToggleBtn" onclick="toggleStopwatch()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-6 py-3 rounded-xl btn-3d">Start Timer</button>
+          <button onclick="resetStopwatch()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-4 py-3 rounded-xl">Reset</button>
+        </div>
+        <button onclick="saveDurationObservation()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-3 rounded-xl shadow btn-3d">
+          Commit Duration Metric
+        </button>
+      </div>
+
+      <!-- METHOD 5: TASK ANALYSIS CHECKLIST -->
+      <div id="method-task" class="method-panel hidden card-3d bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-md max-w-2xl mx-auto space-y-4">
+        <h3 class="font-bold text-slate-900 text-base border-b border-slate-100 pb-2">Task Analysis Step Checklist</h3>
+        <div id="taskChecklistContainer" class="space-y-2 text-xs"></div>
+        <div class="pt-3 border-t flex justify-between items-center text-xs font-bold">
+          <span>Independence Score: <span id="taskScorePct" class="text-emerald-600 font-extrabold text-base">0%</span></span>
+          <button onclick="saveTaskAnalysisObservation()" class="bg-sky-600 hover:bg-sky-500 text-white px-5 py-2.5 rounded-xl shadow btn-3d">Save Checklist Entry</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: 50 STATE BOARDS -->
+    <section id="sec-stateguidelines" class="hidden space-y-5">
+      <div class="card-3d rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 gap-2">
+          <div>
+            <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-landmark text-sky-600"></i> 50-State Board Repository
+            </h2>
+            <p class="text-xs text-slate-500">Special Education Guidelines & Standards</p>
+          </div>
+          <div class="w-full sm:w-64">
+            <select id="guidelinesStateSelect" onchange="renderStateComplianceDetails()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-bold"></select>
+          </div>
+        </div>
+        <div id="stateComplianceDetailCard" class="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-4"></div>
+      </div>
+    </section>
+
+    <!-- TAB 7: MASTER ADMIN -->
+    <section id="sec-masterhub" class="hidden space-y-5">
+      <div class="card-3d rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-user-shield text-emerald-600"></i> Master Admin Control Hub
+              </h2>
+            </div>
+            <p class="text-xs text-slate-500">Rosters, Credentials Vault, and System Configurations.</p>
+          </div>
+        </div>
+        <div id="rosterTableContainer" class="overflow-x-auto custom-scrollbar"></div>
+      </div>
+    </section>
+
+    <!-- TAB 8: REPORTS -->
+    <section id="sec-reports" class="hidden space-y-4 print-card">
+      <div class="card-3d rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-5">
+        <div class="flex justify-between items-center border-b pb-4">
+          <div>
+            <h2 class="text-xl font-black text-slate-900" id="reportStudentName">Student Summary Report</h2>
+            <p class="text-xs text-slate-500" id="reportDate">Generated October 2026</p>
+          </div>
+          <span class="text-xs font-black text-emerald-600 uppercase tracking-widest">BxPulse Analytics</span>
+        </div>
+        <div id="reportGoalsList" class="space-y-2"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODALS -->
+  <div id="linkParentContactsModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-xl w-full p-6 space-y-5 card-3d">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-extrabold text-slate-900 text-sm">Link Contacts to Parent Account</h3>
+        <button onclick="closeLinkParentContactsModal()"><i class="fa-solid fa-xmark text-lg text-slate-400"></i></button>
+      </div>
+      <form onsubmit="saveParentContactLinks(event)" class="space-y-4 text-xs">
+        <select id="linkModalParentSelect" onchange="renderParentContactSelectionList()" class="w-full bg-slate-50 border border-slate-200 font-bold rounded-xl p-2.5 text-slate-800"></select>
+        <div id="parentContactChecklistContainer" class="bg-slate-50 p-3 rounded-2xl border border-slate-200 max-h-56 overflow-y-auto custom-scrollbar space-y-2"></div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow transition btn-3d">Save Directory</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="goalEditModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full p-6 space-y-4 card-3d">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-slate-900 text-sm" id="goalModalHeader">Edit IEP Goal</h3>
+        <button onclick="closeGoalEditModal()"><i class="fa-solid fa-xmark text-lg text-slate-400"></i></button>
+      </div>
+      <form onsubmit="handleGoalFormSubmit(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="modalGoalId">
+        <input type="text" id="modalGoalTitle" required placeholder="Goal Title" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+        <select id="modalGoalDomain" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+          <option value="Behavioral">Behavioral</option>
+          <option value="Social-Emotional">Social-Emotional</option>
+          <option value="Academic">Academic</option>
+        </select>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="number" id="modalGoalCurrent" min="0" max="100" required placeholder="Current %" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+          <input type="number" id="modalGoalTarget" min="0" max="100" required placeholder="Target %" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow transition btn-3d">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="goalDataLogModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full p-6 space-y-4 card-3d">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-slate-900 text-sm">Add Observation Data</h3>
+        <button onclick="closeGoalDataLogModal()"><i class="fa-solid fa-xmark text-lg text-slate-400"></i></button>
+      </div>
+      <form onsubmit="handleDirectDataLogSubmit(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="directLogGoalId">
+        <input type="number" id="directLogScore" min="0" max="100" required placeholder="e.g. 85" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-lg font-bold text-emerald-600 text-center">
+        <textarea id="directLogNotes" rows="3" required placeholder="Clinical Notes..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5"></textarea>
+        <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-xl shadow transition btn-3d">Commit Data Log</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const US_STATES_DATABASE = [
+      { code: 'IL', name: 'Illinois', board: 'Illinois State Board of Education (ISBE)', form: 'ISBE-34-54-IEP', codeRef: '23 IL Admin Code 226' },
+      { code: 'CA', name: 'California', board: 'California Department of Education (CDE / SELPA)', form: 'CA-SEIS-IEP-504', codeRef: '5 CA ADC § 3030' },
+      { code: 'NY', name: 'New York', board: 'New York State Education Department (NYSED)', form: 'NYSED-IEP-TEMPLATE', codeRef: '8 NYCRR Part 200' }
+    ];
+
+    const MASTER_ACCOUNT_EMAIL = 'kevin.tudor@brightmontacademy.com';
+    const MASTER_ACCOUNT_PASSWORD = 'Teachsped13!';
+
+    let appState = {
+      currentUser: { id: 'a1', name: 'Kevin Tudor', role: 'Master Admin', email: MASTER_ACCOUNT_EMAIL, password: MASTER_ACCOUNT_PASSWORD, state: 'IL', district: 'District #158' },
+      currentStudentId: 's1',
+      activeTab: 'analytics',
+      activeGoalId: 'g1',
+      activeMessagingRecipientId: 'p1',
+      rosterMembers: [
+        { id: 's1', name: 'Alex Rivera', role: 'student', typeLabel: '7th Grade', detail: 'IEP-8842', password: 'AlexR#2026', state: 'IL', district: 'District #158', status: 'ACTIVE' },
+        { id: 't1', name: 'Sarah Miller BCBA', role: 'staff', typeLabel: 'Lead BCBA', detail: 's.miller@bxpulse.edu', password: 'BCBApass2026!', state: 'IL', district: 'District #158', status: 'ACTIVE' },
+        { id: 'p1', name: 'Elena Rivera', role: 'parent', typeLabel: 'Parent Guardian', detail: 'e.rivera@parent.org', password: 'ParentSecure123!', state: 'IL', district: 'District #158', status: 'ACTIVE', linkedContacts: ['s1', 't1', 'a1'] },
+        { id: 'a1', name: 'Kevin Tudor', role: 'admin', typeLabel: 'Master Owner', detail: MASTER_ACCOUNT_EMAIL, password: MASTER_ACCOUNT_PASSWORD, state: 'IL', district: 'District #158', status: 'ACTIVE' }
+      ],
+      goals: [
+        { id: 'g1', studentId: 's1', title: 'On-Task Engagement in Academic Work', domain: 'Behavioral', current: 78.4, target: 85, status: 'ACTIVE' }
+      ],
+      observations: [
+        { id: 'obs_101', studentId: 's1', goalId: 'g1', className: 'Math', method: 'MTS', score: 80, note: 'Sustained engagement', date: '2026-10-20' }
+      ],
+      messages: [],
+      taskSteps: [
+        { text: 'Gather required materials', done: true },
+        { text: 'Open assignment page', done: true },
+        { text: 'Complete assigned problems independently', done: false }
+      ]
+    };
+
+    let chartInstances = {};
+    let timerInterval = null;
+    let timerTimeLeft = 30;
+    let isTimerActive = false;
+    let stopwatchInterval = null;
+    let stopwatchSeconds = 0;
+    let freqCount = 0;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      populate50StatesDropdowns();
+      populateStudentDropdown();
+      populateGoalDropdown();
+      enforceRolePermissions();
+      renderTaskChecklist();
+      renderActiveStudentViews();
+      renderStateComplianceDetails();
+    });
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      document.getElementById('authScreen').classList.add('hidden');
+      enforceRolePermissions();
+    }
+
+    function handleUserLogout() {
+      document.getElementById('authScreen').classList.remove('hidden');
+    }
+
+    function enforceRolePermissions() {
+      const navContainer = document.getElementById('navigationTabsContainer');
+      navContainer.innerHTML = '';
+
+      const tabs = [
+        { id: 'analytics', label: 'Analytics', icon: 'fa-chart-line' },
+        { id: 'goals', label: 'Interactive Goals', icon: 'fa-bullseye' },
+        { id: 'aigoalwriter', label: 'Gemini AI Assistant', icon: 'fa-wand-magic-sparkles' },
+        { id: 'messaging', label: 'Messaging Portal', icon: 'fa-comments' },
+        { id: 'tracking', label: 'Multi-Method Hub', icon: 'fa-stopwatch' },
+        { id: 'stateguidelines', label: '50 State Boards', icon: 'fa-landmark' },
+        { id: 'masterhub', label: 'Master Admin', icon: 'fa-user-shield' }
+      ];
+
+      tabs.forEach(t => {
+        const btn = document.createElement('button');
+        btn.id = `tabBtn-${t.id}`;
+        btn.onclick = () => switchTab(t.id);
+        btn.className = 'tab-btn bg-slate-200/80 hover:bg-slate-300 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 whitespace-nowrap btn-3d';
+        btn.innerHTML = `<i class="fa-solid ${t.icon}"></i> <span>${t.label}</span>`;
+        navContainer.appendChild(btn);
+      });
+
+      switchTab('analytics');
+    }
+
+    function switchTab(tabKey) {
+      appState.activeTab = tabKey;
+      ['analytics', 'goals', 'aigoalwriter', 'messaging', 'tracking', 'stateguidelines', 'masterhub', 'reports'].forEach(t => {
+        const sec = document.getElementById(`sec-${t}`);
+        const btn = document.getElementById(`tabBtn-${t}`);
+        if (sec) sec.classList.toggle('hidden', t !== tabKey);
+        if (btn) {
+          btn.classList.toggle('bg-emerald-600', t === tabKey);
+          btn.classList.toggle('text-white', t === tabKey);
+        }
+      });
+
+      if (tabKey === 'analytics') renderCharts();
+      if (tabKey === 'messaging') populateMessagingRecipients();
+    }
+
+    /* BEHAVIOR STRATEGY BUILDER - FULL Dynamic Interventions */
+    function generateBipStrategyAI(e) {
+      e.preventDefault();
+      const beh = document.getElementById('aiBipBehavior').value;
+      const fn = document.getElementById('aiBipFunction').value;
+
+      const strategyMatrix = {
+        "Escape / Avoidance": {
+          antecedents: [
+            `Pre-teach transitions and chunk academic tasks into 5-minute visual work blocks to mitigate ${beh.toLowerCase()}.`,
+            `Provide controlled choices (e.g., choice of assignment sequence, seating position, or writing tool).`,
+            `Implement a visual schedule with explicit 'First/Then' cues prior to task presentation.`
+          ],
+          replacement: `Train student to request a 2-minute sensory/break card prior to exhibiting ${beh.toLowerCase()}.`,
+          consequences: [
+            `Immediately grant a functional 2-minute break upon appropriate break request (Differential Reinforcement of Alternative behavior - DRA).`,
+            `Maintain silent task demand persistence (escape extinction) without power struggles during non-compliance.`
+          ],
+          deescalation: `Provide neutral redirection to the visual break schedule without engaging in verbal negotiation or extended debate.`
+        },
+        "Attention Seeking": {
+          antecedents: [
+            `Schedule non-contingent educator check-ins every 3-5 minutes during independent work.`,
+            `Assign structured leadership roles or peer-partner responsibilities during instructional activities.`
+          ],
+          replacement: `Teach student to tap a 'Help / Check-In' desk visual or raise a hand to solicit positive adult attention.`,
+          consequences: [
+            `Deliver immediate, behavior-specific praise and enthusiasm when the student utilizes proper attention-seeking communication.`,
+            `Apply planned ignoring (extinction) for minor ${beh.toLowerCase()}, reserving verbal interactions strictly for appropriate behavior.`
+          ],
+          deescalation: `Maintain a calm, neutral stance with minimal eye contact while redirecting to reduce unintended reinforcement.`
+        },
+        "Access to Tangible": {
+          antecedents: [
+            `Use visual countdown timers (5-min, 2-min) before transitioning away from preferred materials.`,
+            `Display a visual token economy showing exactly when access to preferred activities will be earned.`
+          ],
+          replacement: `Teach student to request a 'My Turn' visual or use a waiting timer to gain access to preferred items.`,
+          consequences: [
+            `Reinforce patient waiting with immediate token system progress or access to a secondary preferred activity.`,
+            `Withhold access to the contested item or activity while ${beh.toLowerCase()} is occurring.`
+          ],
+          deescalation: `Offer choices between two neutral alternative tasks while keeping restricted items out of reach.`
+        }
+      };
+
+      const plan = strategyMatrix[fn] || strategyMatrix["Escape / Avoidance"];
+
+      const htmlOutput = `
+        <div class="space-y-3 text-slate-800">
+          <div class="bg-sky-50 border-l-4 border-sky-600 p-2.5 rounded-r-xl">
+            <span class="text-[10px] font-black uppercase text-sky-800 block">Behavior Target & Function Profile</span>
+            <p class="font-bold text-xs text-slate-900">${beh} <span class="text-slate-500 font-normal">(Function: ${fn})</span></p>
+          </div>
+
+          <div>
+            <h4 class="font-extrabold text-emerald-700 text-xs flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-shield-halved"></i> 1. Proactive Antecedent Modifications
+            </h4>
+            <ul class="list-disc pl-5 space-y-1 text-slate-700 text-xs">
+              ${plan.antecedents.map(a => `<li>${a}</li>`).join('')}
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="font-extrabold text-sky-700 text-xs flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-arrows-rotate"></i> 2. Functionally Equivalent Replacement Behavior (FERB)
+            </h4>
+            <p class="bg-slate-100 p-2 rounded-lg text-slate-800 font-medium text-xs">${plan.replacement}</p>
+          </div>
+
+          <div>
+            <h4 class="font-extrabold text-teal-700 text-xs flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-circle-check"></i> 3. Reinforcement & Consequence Protocols
+            </h4>
+            <ul class="list-disc pl-5 space-y-1 text-slate-700 text-xs">
+              ${plan.consequences.map(c => `<li>${c}</li>`).join('')}
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="font-extrabold text-rose-700 text-xs flex items-center gap-1.5 mb-1">
+              <i class="fa-solid fa-triangle-exclamation"></i> 4. De-escalation & Crisis Protocol
+            </h4>
+            <p class="bg-rose-50 border border-rose-200 text-rose-900 p-2 rounded-lg font-medium text-xs">${plan.deescalation}</p>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('aiBipGeneratedContent').innerHTML = htmlOutput;
+      document.getElementById('aiBipOutputBox').classList.remove('hidden');
+    }
+
+    function generateSmartGoalAI(e) {
+      e.preventDefault();
+      const domain = document.getElementById('aiGoalDomain').value;
+      const baseline = document.getElementById('aiGoalBaseline').value;
+      const target = document.getElementById('aiGoalTarget').value;
+      const area = document.getElementById('aiGoalArea').value.trim();
+
+      const student = appState.rosterMembers.find(s => s.id === appState.currentStudentId);
+      const studentName = student ? student.name : 'The student';
+
+      const goalText = `By the end of the annual IEP period, given standard instructional settings, ${studentName} will demonstrate improved ${domain.toLowerCase()} competency in ${area}, increasing performance from a baseline of ${baseline}% to at least ${target}% accuracy across 4 of 5 opportunities.`;
+
+      appState.lastGeneratedGoal = { title: area, domain, current: parseFloat(baseline), target: parseFloat(target) };
+      document.getElementById('aiGoalGeneratedText').textContent = goalText;
+      document.getElementById('aiGoalOutputBox').classList.remove('hidden');
+    }
+
+    function addGeneratedGoalToActiveStudent() {
+      if (!appState.lastGeneratedGoal) return;
+      appState.goals.push({
+        id: 'g_' + Date.now(),
+        studentId: appState.currentStudentId,
+        title: appState.lastGeneratedGoal.title,
+        domain: appState.lastGeneratedGoal.domain,
+        current: appState.lastGeneratedGoal.current,
+        target: appState.lastGeneratedGoal.target,
+        status: 'ACTIVE'
+      });
+      populateGoalDropdown();
+      renderInteractiveGoals();
+      alert('Goal added to student profile!');
+    }
+
+    /* TIMERS & METHOD TRACKING */
+    function toggleMtsTimer() {
+      const btn = document.getElementById('mtsToggleBtn');
+      if (isTimerActive) {
+        clearInterval(timerInterval);
+        isTimerActive = false;
+        btn.textContent = 'Resume Session';
+      } else {
+        isTimerActive = true;
+        btn.textContent = 'Pause Session';
+        timerInterval = setInterval(() => {
+          timerTimeLeft--;
+          const mins = Math.floor(timerTimeLeft / 60).toString().padStart(2, '0');
+          const secs = (timerTimeLeft % 60).toString().padStart(2, '0');
+          document.getElementById('mtsDigits').textContent = `${mins}:${secs}`;
+          if (timerTimeLeft <= 0) {
+            clearInterval(timerInterval);
+            isTimerActive = false;
+            btn.textContent = 'Restart Timer';
+          }
+        }, 1000);
+      }
+    }
+
+    function resetMtsTimer() {
+      clearInterval(timerInterval);
+      isTimerActive = false;
+      timerTimeLeft = parseInt(document.getElementById('mtsIntervalSelect').value, 10);
+      document.getElementById('mtsDigits').textContent = `00:${timerTimeLeft.toString().padStart(2, '0')}`;
+      document.getElementById('mtsToggleBtn').textContent = 'Start Session';
+    }
+
+    function recordMtsTally(isOnTask) {
+      commitObservationEvent('MTS', isOnTask ? 100 : 0, isOnTask ? 'MTS: ON-TASK' : 'MTS: OFF-TASK');
+      alert(`Recorded MTS Interval: ${isOnTask ? 'ON-TASK' : 'OFF-TASK'}`);
+      resetMtsTimer();
+    }
+
+    function handleAbcSubmit(e) {
+      e.preventDefault();
+      const fn = document.getElementById('abcFunction').value;
+      commitObservationEvent('ABC', 1, `ABC Observation logged for function: ${fn}`);
+      document.getElementById('abcBehavior').value = '';
+      alert(`ABC Event Logged! Function: ${fn}`);
+    }
+
+    function adjustFreqCount(val) {
+      freqCount = Math.max(0, freqCount + val);
+      document.getElementById('freqCountDisplay').textContent = freqCount;
+    }
+
+    function saveFreqObservation() {
+      commitObservationEvent('Frequency Tally', freqCount, `Tally total: ${freqCount}`);
+      alert(`Committed Frequency Tally: ${freqCount}`);
+      freqCount = 0;
+      document.getElementById('freqCountDisplay').textContent = '0';
+    }
+
+    function toggleStopwatch() {
+      const btn = document.getElementById('stopwatchToggleBtn');
+      if (stopwatchInterval) {
+        clearInterval(stopwatchInterval);
+        stopwatchInterval = null;
+        btn.textContent = 'Resume Timer';
+      } else {
+        btn.textContent = 'Pause Timer';
+        stopwatchInterval = setInterval(() => {
+          stopwatchSeconds++;
+          const mins = Math.floor(stopwatchSeconds / 60).toString().padStart(2, '0');
+          const secs = (stopwatchSeconds % 60).toString().padStart(2, '0');
+          document.getElementById('stopwatchDisplay').textContent = `${mins}:${secs}`;
+        }, 1000);
+      }
+    }
+
+    function resetStopwatch() {
+      clearInterval(stopwatchInterval);
+      stopwatchInterval = null;
+      stopwatchSeconds = 0;
+      document.getElementById('stopwatchDisplay').textContent = '00:00';
+    }
+
+    function saveDurationObservation() {
+      commitObservationEvent('Duration', stopwatchSeconds, `Elapsed time: ${stopwatchSeconds}s`);
+      alert(`Recorded Duration: ${stopwatchSeconds} Seconds.`);
+      resetStopwatch();
+    }
+
+    function renderTaskChecklist() {
+      const container = document.getElementById('taskChecklistContainer');
+      container.innerHTML = '';
+      appState.taskSteps.forEach((step, idx) => {
+        container.innerHTML += `
+          <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <span class="font-medium text-slate-700">${idx + 1}. ${step.text}</span>
+            <input type="checkbox" ${step.done ? 'checked' : ''} onchange="toggleTaskStep(${idx})" class="w-4 h-4 text-emerald-600 rounded">
+          </div>
+        `;
+      });
+      calculateTaskScore();
+    }
+
+    function toggleTaskStep(idx) {
+      appState.taskSteps[idx].done = !appState.taskSteps[idx].done;
+      calculateTaskScore();
+    }
+
+    function calculateTaskScore() {
+      const doneCount = appState.taskSteps.filter(s => s.done).length;
+      const pct = Math.round((doneCount / appState.taskSteps.length) * 100);
+      document.getElementById('taskScorePct').textContent = `${pct}%`;
+      return pct;
+    }
+
+    function saveTaskAnalysisObservation() {
+      const score = calculateTaskScore();
+      commitObservationEvent('Task Analysis %', score, `Task score: ${score}%`);
+      alert(`Committed Task Score: ${score}%`);
+    }
+
+    function switchDataMethod(methodKey) {
+      ['mts', 'abc', 'freq', 'dur', 'task'].forEach(m => {
+        const panel = document.getElementById(`method-${m}`);
+        const btn = document.getElementById(`methodBtn-${m}`);
+        if (panel) panel.classList.toggle('hidden', m !== methodKey);
+        if (btn) {
+          btn.classList.toggle('bg-emerald-600', m === methodKey);
+          btn.classList.toggle('text-white', m === methodKey);
+        }
+      });
+    }
+
+    function commitObservationEvent(method, score, noteText) {
+      appState.observations.push({
+        id: 'obs_' + Date.now(),
+        studentId: appState.currentStudentId,
+        goalId: appState.activeGoalId,
+        method, score, note: noteText, date: new Date().toISOString().split('T')[0]
+      });
+      renderInteractiveGoals();
+      renderCharts();
+    }
+
+    /* MESSAGING & MODALS */
+    function populateMessagingRecipients() {
+      const select = document.getElementById('messageRecipientSelect');
+      select.innerHTML = '';
+      appState.rosterMembers.filter(m => m.id !== appState.currentUser.id).forEach(m => {
+        select.innerHTML += `<option value="${m.id}">${m.name} (${m.role})</option>`;
+      });
+    }
+
+    function openAddGoalModal() {
+      document.getElementById('modalGoalId').value = '';
+      document.getElementById('modalGoalTitle').value = '';
+      document.getElementById('goalEditModal').classList.remove('hidden');
+    }
+    function closeGoalEditModal() { document.getElementById('goalEditModal').classList.add('hidden'); }
+
+    function openGoalDataLogModal(goalId) {
+      document.getElementById('directLogGoalId').value = goalId;
+      document.getElementById('goalDataLogModal').classList.remove('hidden');
+    }
+    function closeGoalDataLogModal() { document.getElementById('goalDataLogModal').classList.add('hidden'); }
+
+    function openLinkParentContactsModal() { document.getElementById('linkParentContactsModal').classList.remove('hidden'); }
+    function closeLinkParentContactsModal() { document.getElementById('linkParentContactsModal').classList.add('hidden'); }
+
+    function handleGoalFormSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('modalGoalTitle').value.trim();
+      appState.goals.push({
+        id: 'g_' + Date.now(),
+        studentId: appState.currentStudentId,
+        title, domain: document.getElementById('modalGoalDomain').value,
+        current: parseFloat(document.getElementById('modalGoalCurrent').value),
+        target: parseFloat(document.getElementById('modalGoalTarget').value), status: 'ACTIVE'
+      });
+      closeGoalEditModal();
+      renderInteractiveGoals();
+    }
+
+    function handleDirectDataLogSubmit(e) {
+      e.preventDefault();
+      commitObservationEvent('Direct Log', parseFloat(document.getElementById('directLogScore').value), document.getElementById('directLogNotes').value);
+      closeGoalDataLogModal();
+    }
+
+    function populate50StatesDropdowns() {
+      const select = document.getElementById('guidelinesStateSelect');
+      select.innerHTML = '';
+      US_STATES_DATABASE.forEach(s => { select.innerHTML += `<option value="${s.code}">${s.name} (${s.code})</option>`; });
+    }
+
+    function populateStudentDropdown() {
+      const select = document.getElementById('activeStudentSelect');
+      select.innerHTML = '';
+      appState.rosterMembers.filter(r => r.role === 'student').forEach(s => {
+        select.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+      });
+    }
+
+    function switchStudentContext() {
+      appState.currentStudentId = document.getElementById('activeStudentSelect').value;
+      renderActiveStudentViews();
+    }
+
+    function populateGoalDropdown() {
+      const select = document.getElementById('globalTrackerGoalSelect');
+      select.innerHTML = '';
+      appState.goals.filter(g => g.studentId === appState.currentStudentId).forEach(g => {
+        select.innerHTML += `<option value="${g.id}">${g.title}</option>`;
+      });
+    }
+
+    function syncGlobalTrackerGoal() {
+      appState.activeGoalId = document.getElementById('globalTrackerGoalSelect').value;
+    }
+
+    function renderActiveStudentViews() {
+      renderInteractiveGoals();
+      renderCharts();
+    }
+
+    function renderInteractiveGoals() {
+      const container = document.getElementById('interactiveGoalsContainer');
+      container.innerHTML = '';
+      appState.goals.filter(g => g.studentId === appState.currentStudentId).forEach(g => {
+        container.innerHTML += `
+          <div class="card-3d bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
+            <h3 class="font-bold text-slate-900 text-sm">${g.title}</h3>
+            <div class="flex justify-between text-xs font-semibold">
+              <span>Score: ${g.current}%</span><span>Target: ${g.target}%</span>
+            </div>
+            <button onclick="openGoalDataLogModal('${g.id}')" class="bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs btn-3d">Log Data</button>
+          </div>
+        `;
+      });
+    }
+
+    function renderCharts() {
+      if (appState.activeTab !== 'analytics') return;
+      if (chartInstances.predictive) chartInstances.predictive.destroy();
+      const logs = appState.observations.filter(o => o.studentId === appState.currentStudentId);
+      chartInstances.predictive = new Chart(document.getElementById('predictiveChartCanvas'), {
+        type: 'line',
+        data: {
+          labels: logs.map((_, i) => `Log ${i + 1}`),
+          datasets: [{ label: 'Score', data: logs.map(l => l.score), borderColor: '#0284c7', fill: true }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    function renderStateComplianceDetails() {
+      const code = document.getElementById('guidelinesStateSelect').value;
+      const st = US_STATES_DATABASE.find(s => s.code === code) || US_STATES_DATABASE[0];
+      document.getElementById('stateComplianceDetailCard').innerHTML = `
+        <h3 class="text-base font-black text-slate-900">${st.name} - ${st.board}</h3>
+        <p class="text-xs text-slate-600">Form: ${st.form} • Code: ${st.codeRef}</p>
+      `;
+    }
+
+    function toggleAnonymizePII() {}
+    function resetInactivityTimer() {}
+    function switchMessagingRecipient() {}
+    function handleSendPortalMessage(e) { e.preventDefault(); }
+    function renderParentContactSelectionList() {}
+    function saveParentContactLinks(e) { e.preventDefault(); closeLinkParentContactsModal(); }
+  </script>
+</body>
+</html>
